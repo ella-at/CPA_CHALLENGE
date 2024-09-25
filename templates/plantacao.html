@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Plantações</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Biblioteca para gráficos -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: rgb(236, 255, 229);
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: #f8fff0;
+            padding: 20px;
+            width: 95%;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .table-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        td {
+            font-size: 14px;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .btn-cronograma {
+            background-color: #4caf50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-cronograma:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+
+        .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            margin: 20px auto;
+            display: block;
+            max-width: 100%;
+        }
+
+        /* Layout responsivo para gráficos */
+        .charts-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .charts-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn-cronograma {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
+
+        /* Estilos para o modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Título e tabela de plantações cadastradas -->
+        <div class="section-header">Lista de Plantações Cadastradas</div>
+        <div class="table-container">
+            <table class="table" id="plantacoesTabela">
+                <thead>
+                    <tr>
+                        <th>Nome da Plantação</th>
+                        <th>Área de Plantio</th>
+                        <th>Tipo de Cultivo</th>
+                        <th>Responsável</th>
+                        <th>Data de Plantação</th>
+                        <th>Data Prevista de Colheita</th>
+                        <th>Lucro Previsto</th> <!-- Novo campo de lucro previsto -->
+                        <th>Cronograma</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Plantação preenchida dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Gráficos e relatórios -->
+        <div class="section-header">Análises e Relatórios</div>
+
+        <!-- Container para os gráficos -->
+        <div class="charts-wrapper">
+            <!-- Gráfico de Áreas de Plantio vs Plantações -->
+            <div class="chart-container">
+                <h4>Áreas de Plantio vs Plantações</h4>
+                <canvas id="graficoPlantio"></canvas>
+            </div>
+
+            <!-- Gráfico de Tipos de Cultivos por Plantações -->
+            <div class="chart-container">
+                <h4>Tipos de Cultivos por Plantações</h4>
+                <canvas id="graficoCultivos"></canvas>
+            </div>
+
+            <!-- Gráfico de Produtividade e Funcionários -->
+            <div class="chart-container">
+                <h4>Produtividade e Envolvimento dos Funcionários</h4>
+                <canvas id="graficoProdutividade"></canvas>
+            </div>
+
+            <!-- Gráfico de Receita, Lucro e Gastos -->
+            <div class="chart-container">
+                <h4>Receita, Lucro e Gastos</h4>
+                <canvas id="graficoFinanceiro"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Ver Cronograma -->
+    <div id="modalCronograma" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h3>Cronograma Completo</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Atividade</th>
+                        <th>Descrição</th>
+                        <th>Equipamentos Necessários</th>
+                    </tr>
+                </thead>
+                <tbody id="modalCronogramaTabela">
+                    <!-- Linhas serão preenchidas dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Variável para armazenar as plantações simuladas
+        let plantacoes = [
+        {
+            nome: 'Plantação A',
+            area: 'Área 1',
+            cultivo: 'Milho',
+            responsavel: 'João',
+            data_plantacao: '2024-01-10',
+            data_colheita: '2024-06-10',
+            lucro_previsto: 10000 // Novo campo de lucro previsto
+        },
+        {
+            nome: 'Plantação B',
+            area: 'Área 2',
+            cultivo: 'Soja',
+            responsavel: 'Maria',
+            data_plantacao: '2024-02-15',
+            data_colheita: '2024-07-15',
+            lucro_previsto: 12000 // Novo campo de lucro previsto
+        }
+        // Adicione mais plantações conforme necessário
+    ];
+
+    // Função para exibir as plantações na tabela
+    function exibirPlantacoes(plantacoes) {
+        const tabela = document.getElementById('plantacoesTabela').querySelector('tbody');
+        tabela.innerHTML = '';
+
+        plantacoes.forEach(plantacao => {
+            tabela.innerHTML += `
+                <tr>
+                    <td>${plantacao.nome}</td>
+                    <td>${plantacao.area}</td>
+                    <td>${plantacao.cultivo}</td>
+                    <td>${plantacao.responsavel}</td>
+                    <td>${plantacao.data_plantacao}</td>
+                    <td>${plantacao.data_colheita}</td>
+                    <td>R$ ${plantacao.lucro_previsto}</td> <!-- Lucro previsto exibido -->
+                    <td><button class="btn-cronograma" onclick="verCronograma('${plantacao.nome}')">Ver Cronograma</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    // Função para abrir o modal com o cronograma
+    function verCronograma(nomePlantacao) {
+        const tabelaModal = document.getElementById('modalCronogramaTabela');
+        tabelaModal.innerHTML = `
+            <tr>
+                <td>2024-01-10</td>
+                <td>Preparar o Solo</td>
+                <td>Aragem profunda e remoção de ervas daninhas.</td>
+                <td>Trator, Arado</td>
+            </tr>
+            <tr>
+                <td>2024-01-15</td>
+                <td>Plantio</td>
+                <td>Plantio das sementes de milho.</td>
+                <td>Semeadora</td>
+            </tr>
+            <tr>
+                <td>2024-01-30</td>
+                <td>Adubação</td>
+                <td>Aplicação de adubo NPK para fortalecer o crescimento.</td>
+                <td>Adubadora</td>
+            </tr>
+            <tr>
+                <td>2024-02-10</td>
+                <td>Irrigação</td>
+                <td>Irrigação controlada com base na previsão do tempo.</td>
+                <td>Sistema de Irrigação</td>
+            </tr>
+            <tr>
+                <td>2024-03-05</td>
+                <td>Aplicação de Pesticida</td>
+                <td>Proteção contra pragas e doenças.</td>
+                <td>Pulverizador</td>
+            </tr>
+            <tr>
+                <td>2024-06-20</td>
+                <td>Colheita</td>
+                <td>Colheita do milho pronto.</td>
+                <td>Colheitadeira</td>
+            </tr>
+        `;
+        document.getElementById('modalCronograma').style.display = 'flex';
+    }
+
+    function fecharModal() {
+        document.getElementById('modalCronograma').style.display = 'none';
+    }
+
+    // Função para gerar gráficos usando Chart.js
+    function gerarGraficos() {
+        // Gráfico de Áreas de Plantio vs Plantações
+        const ctxPlantio = document.getElementById('graficoPlantio').getContext('2d');
+        new Chart(ctxPlantio, {
+            type: 'pie',
+            data: {
+                labels: ['Áreas Livres', 'Áreas Cultivadas'],
+                datasets: [{
+                    label: 'Áreas',
+                    data: [5, 15], // Dados simulados
+                    backgroundColor: ['#e74c3c', '#2ecc71']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Tipos de Cultivos por Plantações
+        const ctxCultivos = document.getElementById('graficoCultivos').getContext('2d');
+        new Chart(ctxCultivos, {
+            type: 'bar',
+            data: {
+                labels: ['Milho', 'Soja', 'Trigo', 'Feijão'],
+                datasets: [{
+                    label: 'Cultivos',
+                    data: [5, 7, 3, 2], // Dados simulados
+                    backgroundColor: ['#3498db', '#9b59b6', '#f1c40f', '#e67e22']
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Produtividade e Funcionários Envolvidos
+        const ctxProdutividade = document.getElementById('graficoProdutividade').getContext('2d');
+        new Chart(ctxProdutividade, {
+            type: 'line',
+            data: {
+                labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
+                datasets: [{
+                    label: 'Produtividade (toneladas)',
+                    data: [10, 12, 15, 14, 16], // Dados simulados
+                    borderColor: '#1abc9c',
+                    fill: false,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Gráfico de Receita, Lucro e Gastos
+        const ctxFinanceiro = document.getElementById('graficoFinanceiro').getContext('2d');
+        new Chart(ctxFinanceiro, {
+            type: 'bar',
+            data: {
+                labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
+                datasets: [
+                    {
+                        label: 'Receita',
+                        data: [5000, 7000, 6000, 8000, 9000], // Dados simulados
+                        backgroundColor: '#3498db'
+                    },
+                    {
+                        label: 'Gastos',
+                        data: [2000, 3000, 2500, 4000, 3500], // Dados simulados
+                        backgroundColor: '#e74c3c'
+                    },
+                    {
+                        label: 'Lucro',
+                        data: [3000, 4000, 3500, 4000, 5500], // Dados simulados
+                        backgroundColor: '#2ecc71'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    // Função para exibir plantações e gerar gráficos ao carregar a página
+    window.onload = function() {
+        exibirPlantacoes(plantacoes);
+        gerarGraficos();
+    };
+    </script>
+</body>
+</html>

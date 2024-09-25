@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: rgb(236, 255, 229);
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 30% 70%;
+      grid-template-rows: 1fr 1fr;
+      gap: 10px;
+      background-color: #f8fff0;
+      padding: 20px;
+      width: 95%;
+      height: calc(100vh - 20px);
+      margin-top: 0;
+    }
+
+    .left-panel, .right-panel, .left-panel-bottom, .right-panel-bottom {
+      border: 2px solid #a3d48b;
+      padding: 10px;
+      border-radius: 8px;
+      margin: 0;
+    }
+
+    .left-panel, .left-panel-bottom {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .right-panel, .right-panel-bottom {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .container-drone-notifications {
+      display: flex;
+      justify-content: flex-start;
+      gap: 5px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .buttons-row-clima {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .button-clima {
+      background-color: rgb(191, 236, 255);
+      height: 350px;
+      width: 45%;
+      border: none;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      font-family: 'Arial', sans-serif;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .button-clima:hover {
+      background-color: #acdcff;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .text-blue-clima {
+      display: inline-block;
+      padding: 15px;
+      background-color: #7dc5ff;
+      color: white;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 1.1em;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      font-family: 'Arial', sans-serif;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .container-drone {
+      background-color: #509049e8;
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      width: 550px;
+      height: 350px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      margin: 0;
+    }
+
+    .container-drone:hover {
+      background-color: rgb(63, 111, 58);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .drone-section img {
+      width: 150px;
+      height: 150px;
+    }
+
+    .drone-section span {
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .text-section-drone {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      height: 100%;
+      margin-left: 10px;
+    }
+
+    .text-section-drone a {
+      color: rgb(255, 255, 255);
+      font-size: 20px;
+      font-weight: bold;
+      text-decoration: none;
+    }
+
+    .progress-text-drone {
+      color: rgb(250, 225, 61);
+      font-size: 14px;
+      margin-top: 1px;
+    }
+
+    .problema-text-drone {
+      color: rgb(250, 225, 61);
+      font-size: 14px;
+      margin-top: 1px;
+    }
+
+    .text-section-drone a:hover {
+      color: #034d1f;
+    }
+
+    .container-notifications {
+      background-color: #509049ad;
+      border-radius: 8px;
+      padding: 20px;
+      width: 550px;
+      height: 350px;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      margin: 0;
+    }
+
+    .notification {
+      background-color: white;
+      padding: 10px;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      font-size: 14px;
+      color: #333;
+    }
+
+    .notification h4 {
+        margin-bottom: 5px;
+        font-size: 18px;
+        color: #333;
+    }
+  
+    .notification p {
+        font-size: 14px;
+        color: #555;
+    }
+
+    /* Painel Inferior */
+    .container-bottom {
+        background-color: #e0ffe0;
+        border-radius: 8px;
+        padding: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        flex-direction: column;
+    }
+
+    .container-bottom-text {
+      font-size: 18px;
+      color: #333;
+      text-align: center;
+    }
+
+    /* Estilização dos Botões no Painel Inferior Direito e Esquerdo */
+    .buttons-row {
+      display: flex;
+      justify-content: space-around;
+      gap: 10px;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .button-service {
+      background-color: rgba(63, 159, 95, 0.582);
+      height: 100px;
+      width: 150px;
+      border: none;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 10px;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+      font-family: 'Arial', sans-serif;
+      box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .button-service img {
+      width: 50px;
+      height: 50px;
+      margin-bottom: 5px;
+    }
+
+    .button-service:hover {
+      background-color: #2f7349a5;
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .service-name {
+      font-size: 16px;
+      color: #333;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Painel esquerdo -->
+    <div class="left-panel">
+      <div class="buttons-row-clima">
+        <button class="button-clima">
+          <a href="/drone_ia">
+            <img src="/static/img/clima.png" alt="Clima" style="width:150px; height:130px;">
+            <br>
+            <span class="text-blue-clima">Clima</span>
+          </a>
+        </button>
+
+        <button class="button-clima">
+          <a href="/cronograma">
+            <img src="/static/img/botanical.png" alt="Cronograma" style="width:150px; height:150px;">
+            <br>
+            <span class="text-blue-clima">Cronograma</span>
+          </a>
+        </button>
+      </div>
+    </div>
+
+    <!-- Painel direito -->
+    <div class="right-panel">
+      <div class="container-drone-notifications">
+        <!-- Container do Drone -->
+        <div class="container-drone">
+          <div class="drone-section">
+            <span>Monitoramento por Drone</span>
+            <br>
+            <br>
+            <img src="/static/img/drone_verde.png" alt="Drone">
+          </div>
+
+          <div class="text-section-drone">
+            <a href="/analise_pragas" class="pragas">Pragas</a>
+            <span class="progress-text-drone">Em Progresso</span>
+            <span class="problema-text-drone">0 problemas</span>
+            <br>
+            <a href="/upload" class="doencas">Doenças</a>
+            <span class="progress-text-drone">Em Progresso</span>
+            <span class="problema-text-drone">2 problemas</span>
+            <br>
+            <a href="/queimadas" class="queimadas">Queimadas</a>
+            <span class="progress-text-drone">Em Progresso</span>
+            <span class="problema-text-drone">0 problemas</span>
+          </div>
+        </div>
+
+        <!-- Novo Container de Notificações -->
+        <div class="container-notifications">
+          <div class="notification">
+            <h4>Problema Detectado</h4>
+            <p>O drone identificou uma falha no sistema de sensores. Recomendamos uma verificação completa.</p>
+          </div>
+          <div class="notification">
+            <h4>Atualização de Software</h4>
+            <p>Uma nova atualização de software está disponível para o drone. Verifique as novas funcionalidades.</p>
+          </div>
+          <div class="notification">
+            <h4>Manutenção Programada</h4>
+            <p>O sistema de drones será temporariamente desativado para manutenção no dia 25/09.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Painel Inferior Esquerdo -->
+    <div class="left-panel-bottom">
+        <div class="container-bottom">
+          <!-- Primeira Linha de Botões -->
+          <div class="buttons-row">
+            <button class="button-service">
+              <img src="/static/img/financeiro.png" alt="Serviço 1">
+              <a href="/financeiro" class="service-name">Financeiro</a>
+            </button>
+            <button class="button-service">
+              <img src="/static/img/jobb.png" alt="Serviço 2">
+              <a href="/oportunidades" class="service-name">Oportunidades</a>
+            </button>
+            <button class="button-service">
+              <img src="/static/img/report.png" alt="Serviço 3">
+              <a href="/relatorios" class="service-name">Relatorios</a>
+            </button>
+          </div>
+          <!-- Segunda Linha de Botões -->
+          <div class="buttons-row">
+            <button class="button-service">
+              <img src="/static/img/automacao.png" alt="Serviço 4">
+              <a href="/automacao" class="service-name">Automação</a>
+            </button>
+            <button class="button-service">
+              <img src="/static/img/chatbot.png" alt="Serviço 5">
+              <a href="/chatbot" class="service-name">ChatBot</a>
+            </button>
+            <button class="button-service">
+              <img src="/static/img/id-card.png" alt="Serviço 6">
+              <a href="/funcionarios" class="service-name">Funcionarios</a>
+            </button>
+          </div>
+        </div>
+      </div>
+
+
+
+
+
+    <!-- Painel Inferior Direito -->
+    <div class="right-panel-bottom">
+      <div class="container-bottom">
+        <!-- Primeira Linha de Botões -->
+        <div class="buttons-row">
+          <button class="button-service">
+            <img src="/static/img/agriculture.png" alt="Serviço 1">
+            <a href="/areas_plantio" class="service-name">Gerenciar Fazenda</a>
+          </button>
+          <button class="button-service">
+            <img src="/static/img/checklist.png" alt="Serviço 2">
+            <a href="/logistica" class="service-name">Logistica</a>
+          </button>
+          <button class="button-service">
+            <img src="/static/img/farming.png" alt="Serviço 3">
+            <a href="/plantacao" class="service-name">Planção</a>
+          </button>
+        
+          <button class="button-service">
+            <img src="/static/img/tractor.png" alt="Serviço 4">
+            <a href="/equipamentos" class="service-name">Equipamentos</a>
+          </button>
+          <button class="button-service">
+            <img src="/static/img/insumos.png" alt="Serviço 5">
+            <a href="/estoque" class="service-name">Estoque</a>
+          </button>
+
+          <button class="button-service">
+            <img src="/static/img/gloves.png" alt="Serviço 6">
+            <a href="/atividades" class="service-name">Atividades</a>
+          </button>
+          
+        </div>
+    </div>
+  </div>
+</body>
+</html>

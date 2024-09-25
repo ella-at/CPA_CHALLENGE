@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Equipamentos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #eaf0f1;
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #34495e;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            border: none;
+            color: #ffffff;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        .btn-delete {
+            background-color: #e74c3c;
+            border: none;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-delete:hover {
+            background-color: #c0392b;
+        }
+
+        .table {
+            margin-top: 20px;
+        }
+
+        .table thead th {
+            background-color: #397d3d;
+            color: white;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: #f2f2f2;
+        }
+
+        .table-striped tbody tr:nth-of-type(even) {
+            background-color: #eaf0f1;
+        }
+
+        .status-livre {
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .status-atividade {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #34495e;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        /* Formulário */
+        .form-control {
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 14px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            color: #1d6315;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .table {
+                font-size: 14px;
+            }
+
+            .btn-success, .btn-delete {
+                font-size: 12px;
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gerenciamento de Equipamentos</h1>
+
+        <!-- Botão para cadastrar novo equipamento -->
+        --<button class="btn btn-success" onclick="exibirFormularioCadastro()">Cadastrar Novo Equipamento</button> 
+
+        <!-- Formulário para cadastrar novo equipamento -->
+        <div class="card mb-4" id="formularioCadastro" style="display:none;">
+            <div class="card-body">
+                <h5 class="card-title">Cadastrar Novo Equipamento</h5>
+                <form id="equipamentoForm">
+                    <!-- Nome do equipamento -->
+                    <div class="mb-3">
+                        <label for="nomeEquipamento" class="form-label">Nome do Equipamento</label>
+                        <input type="text" class="form-control" id="nomeEquipamento" required>
+                    </div>
+
+                    <!-- Tipo de equipamento -->
+                    <div class="mb-3">
+                        <label for="tipoEquipamento" class="form-label">Tipo de Equipamento</label>
+                        <select id="tipoEquipamento" class="form-select" required>
+                            <option value="">Selecione o tipo</option>
+                            <option value="trator">Trator</option>
+                            <option value="aspirador">Aspirador</option>
+                            <option value="semeadora">Semeadora</option>
+                            <option value="arado">Arado</option>
+                            <option value="pulverizador">Pulverizador</option>
+                        </select>
+                    </div>
+
+                    <!-- Funções do equipamento -->
+                    <div class="mb-3">
+                        <label for="funcoesEquipamento" class="form-label">Funções do Equipamento</label>
+                        <select id="funcoesEquipamento" class="form-select" multiple required>
+                            <option value="descompactacao_solo">Descompactação do Solo</option>
+                            <option value="remocao_folhas">Remoção de Folhas</option>
+                            <option value="preparacao_solo">Preparação do Solo</option>
+                            <option value="aplicacao_pesticida">Aplicação de Pesticida</option>
+                            <option value="limpeza">Limpeza</option>
+                            <option value="cultivo">Cultivo</option>
+                        </select>
+                    </div>
+
+                    <!-- Marca, Modelo e Ano -->
+                    <div class="mb-3">
+                        <label for="marcaEquipamento" class="form-label">Marca</label>
+                        <input type="text" class="form-control" id="marcaEquipamento" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modeloEquipamento" class="form-label">Modelo</label>
+                        <input type="text" class="form-control" id="modeloEquipamento" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="anoEquipamento" class="form-label">Ano</label>
+                        <input type="number" class="form-control" id="anoEquipamento" required>
+                    </div>
+
+                    <!-- Data da última manutenção -->
+                    <div class="mb-3">
+                        <label for="dataUltimaManutencao" class="form-label">Data da Última Manutenção</label>
+                        <input type="date" class="form-control" id="dataUltimaManutencao" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tabela de Equipamentos -->
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Ano</th>
+                        <th>Funções</th>
+                        <th>Status</th>
+                        <th>Funcionário</th>
+                        <th>Área de Plantio</th>
+                        <th>Última Manutenção</th>
+                        <th>Próxima Manutenção</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody id="equipamentosTabela">
+                    <!-- Itens serão preenchidos dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let equipamentos = [];
+
+        // Função para exibir o formulário de cadastro
+        function exibirFormularioCadastro() {
+            document.getElementById('formularioCadastro').style.display = 'block';
+        }
+
+        // Função para cadastrar um novo equipamento
+        document.getElementById('equipamentoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const nome = document.getElementById('nomeEquipamento').value;
+            const tipo = document.getElementById('tipoEquipamento').value;
+            const funcoes = Array.from(document.getElementById('funcoesEquipamento').selectedOptions).map(option => option.value);
+            const marca = document.getElementById('marcaEquipamento').value;
+            const modelo = document.getElementById('modeloEquipamento').value;
+            const ano = document.getElementById('anoEquipamento').value;
+            const ultimaManutencao = document.getElementById('dataUltimaManutencao').value;
+
+            // Próxima manutenção em 6 meses
+            const proximaManutencao = new Date(ultimaManutencao);
+            proximaManutencao.setMonth(proximaManutencao.getMonth() + 6);
+
+            const novoEquipamento = {
+                nome,
+                tipo,
+                funcoes,
+                marca,
+                modelo,
+                ano,
+                status: 'livre',
+                funcionario: null,
+                area_plantio: null,
+                ultima_manutencao: ultimaManutencao,
+                proxima_manutencao: proximaManutencao.toISOString().split('T')[0]  // AAAA-MM-DD
+            };
+
+            equipamentos.push(novoEquipamento);
+            exibirEquipamentos(equipamentos);
+        });
+
+        // Função para exibir a lista de equipamentos na tabela
+        function exibirEquipamentos(equipamentos) {
+            const tabela = document.getElementById('equipamentosTabela');
+            tabela.innerHTML = '';
+
+            equipamentos.forEach((equipamento, index) => {
+                const statusClass = equipamento.status === 'livre' ? 'status-livre' : 'status-atividade';
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${equipamento.nome}</td>
+                        <td>${equipamento.tipo}</td>
+                        <td>${equipamento.marca}</td>
+                        <td>${equipamento.modelo}</td>
+                        <td>${equipamento.ano}</td>
+                        <td>${equipamento.funcoes.join(', ')}</td>
+                        <td class="${statusClass}">${equipamento.status}</td>
+                        <td>${equipamento.funcionario || 'N/A'}</td>
+                        <td>${equipamento.area_plantio || 'N/A'}</td>
+                        <td>${equipamento.ultima_manutencao}</td>
+                        <td>${equipamento.proxima_manutencao}</td>
+                        <td>
+                            <button class="btn-delete" onclick="excluirEquipamento(${index})">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Função para excluir um equipamento
+        function excluirEquipamento(index) {
+            equipamentos.splice(index, 1);
+            exibirEquipamentos(equipamentos);
+        }
+
+        // Função para carregar os equipamentos ao iniciar a página
+        window.onload = function() {
+            equipamentos = [
+                {
+                    nome: 'Trator John Deere',
+                    tipo: 'trator',
+                    marca: 'John Deere',
+                    modelo: 'JD 5075E',
+                    ano: 2020,
+                    funcoes: ['preparacao_solo', 'cultivo'],
+                    status: 'livre',
+                    funcionario: null,
+                    area_plantio: null,
+                    ultima_manutencao: '2024-01-01',
+                    proxima_manutencao: '2024-07-01'
+                },
+                {
+                    nome: 'Pulverizador',
+                    tipo: 'pulverizador',
+                    marca: 'Stihl',
+                    modelo: 'SG 20',
+                    ano: 2021,
+                    funcoes: ['aplicacao_pesticida', 'limpeza'],
+                    status: 'em atividade',
+                    funcionario: 'José Silva',
+                    area_plantio: 'Área A',
+                    ultima_manutencao: '2024-03-01',
+                    proxima_manutencao: '2024-09-01'
+                }
+            ];
+
+            exibirEquipamentos(equipamentos);
+        };
+
+        document.getElementById('equipamentoForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+        
+            const data = {
+                nome: document.getElementById('nomeEquipamento').value,
+                tipo: document.getElementById('tipoEquipamento').value,
+                funcoes: Array.from(document.getElementById('funcoesEquipamento').selectedOptions).map(option => option.value),
+                marca: document.getElementById('marcaEquipamento').value,
+                modelo: document.getElementById('modeloEquipamento').value,
+                ano: document.getElementById('anoEquipamento').value,
+                ultima_manutencao: document.getElementById('dataUltimaManutencao').value,
+                proxima_manutencao: calcularProximaManutencao(document.getElementById('dataUltimaManutencao').value)
+            };
+        
+            const response = await fetch('/api/equipamentos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        
+            if (response.ok) {
+                alert('Equipamento cadastrado com sucesso!');
+                window.location.reload(); // Recarregar a lista de equipamentos
+            } else {
+                alert('Equipamento salvo');
+            }
+        });
+        
+        function calcularProximaManutencao(ultimaManutencao) {
+            const date = new Date(ultimaManutencao);
+            date.setMonth(date.getMonth() + 6);
+            return date.toISOString().split('T')[0];  // Retornar no formato AAAA-MM-DD
+        }
+        
+        // Carregar os equipamentos ao iniciar a página
+        window.onload = carregarEquipamentos;
+    </script>
+</body>
+</html>

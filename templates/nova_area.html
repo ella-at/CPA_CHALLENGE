@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adicionar Nova Área</title>
+    <link rel="icon" href="/static/img/favicon.png" type="image/png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e8efe8;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+        .form-container {
+            margin: 0 auto;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+        .center {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Adicionar Nova Área de Plantio</h1>
+
+<div class="form-container">
+    <form id="areaForm">
+        <label for="nomeArea">Nome da Área:</label>
+        <input type="text" id="nomeArea" required>
+
+        <label for="tamanhoArea">Tamanho da Área (hectares):</label>
+        <input type="number" id="tamanhoArea" required>
+
+        <label for="solo">Tipo de Solo:</label>
+        <select id="solo" required>
+            <option value="Argiloso">Argiloso</option>
+            <option value="Arenoso">Arenoso</option>
+            <option value="Siltoso">Siltoso</option>
+            <option value="Orgânico">Orgânico</option>
+        </select>
+
+        <label for="rotacao">Rotação de Culturas:</label>
+        <select id="rotacao" required>
+            <option value="true">Sim</option>
+            <option value="false">Não</option>
+        </select>
+
+        <label for="irrigacao">Tipo de Irrigação:</label>
+        <select id="irrigacao" required>
+            <option value="Gotejamento">Gotejamento</option>
+            <option value="Aspersão">Aspersão</option>
+            <option value="Pivot Central">Pivô Central</option>
+        </select>
+
+        <label for="tecnologia">Tecnologia Utilizada:</label>
+        <input type="text" id="tecnologia" required>
+
+        <label for="pragas">Pragas Comuns (opcional):</label>
+        <input type="text" id="pragas">
+
+        <button type="submit">Cadastrar Área</button>
+    </form>
+</div>
+
+<div class="center">
+    <a href="/areas_plantio">
+        <button>Voltar às Áreas de Plantio</button>
+    </a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('areaForm');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Criar nova área com os dados do formulário
+            const novaArea = {
+                id: Date.now(),
+                nome: document.getElementById('nomeArea').value,
+                tamanho: document.getElementById('tamanhoArea').value,
+                solo: document.getElementById('solo').value,
+                rotacao: document.getElementById('rotacao').value === 'true',
+                irrigacao: document.getElementById('irrigacao').value,
+                tecnologia: document.getElementById('tecnologia').value,
+                pragas: document.getElementById('pragas').value || 'Nenhuma'
+            };
+
+            // Salvar nova área no LocalStorage
+            const areas = JSON.parse(localStorage.getItem('areas')) || [];
+            areas.push(novaArea);
+            localStorage.setItem('areas', JSON.stringify(areas));
+
+            // Redirecionar para a página de áreas de plantio
+            window.location.href = '/areas_plantio';
+        });
+    });
+</script>
+
+</body>
+</html>

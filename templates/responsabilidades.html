@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsabilidades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: rgb(236, 255, 229);
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            background-color: #f8fff0;
+            padding: 20px;
+            width: 95%;
+            height: calc(100vh - 40px);
+            margin-top: 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .section-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .table-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        td {
+            font-size: 14px;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* Botão com efeito hover */
+        .btn-success, .btn-add-atividade, .btn-general {
+            background-color: #4caf50;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+            margin: 10px 0;
+        }
+
+        .btn-success:hover, .btn-add-atividade:hover, .btn-general:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+
+        .btn-lg {
+            font-size: 18px;
+        }
+
+        .alert {
+            padding: 15px;
+            background-color: #f44336;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #4caf50;
+        }
+
+        .alert-danger {
+            background-color: #f44336;
+        }
+
+        /* Estilos para o modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover, .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 15px;
+            }
+
+            .form-group label {
+                font-size: 14px;
+            }
+
+            .form-group input, .form-group select {
+                font-size: 12px;
+            }
+
+            .btn-success, .btn-add-atividade, .btn-general {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 12px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Alerta de disponibilidade de equipamentos -->
+        <div id="alertaDisponibilidade" class="alert alert-danger">
+            Equipamentos necessários estão em uso. Aguarde ou tente novamente mais tarde.
+        </div>
+        <div id="alertaCheckinSucesso" class="alert alert-success">
+            Check-in realizado com sucesso!
+        </div>
+
+        <!-- Título com nome do funcionário -->
+        <div class="section-header">Plantações sob responsabilidade do funcionário: <span id="nomeFuncionario"></span></div>
+
+        <!-- Tabela de Plantações sob responsabilidade -->
+        <div class="table-container">
+            <table class="table" id="plantacoesTabela">
+                <thead>
+                    <tr>
+                        <th>Nome da Plantação</th>
+                        <th>Área de Plantio</th>
+                        <th>Tipo de Cultivo</th>
+                        <th>Atividades Realizadas</th>
+                        <th>Equipamento Utilizado</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Linhas preenchidas dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Tabela de Atividades Ativas -->
+        <div class="section-header">Atividades Ativas</div>
+        <div class="table-container">
+            <table class="table" id="atividadesAtivasTabela">
+                <thead>
+                    <tr>
+                        <th>Nome da Atividade</th>
+                        <th>Área de Plantio</th>
+                        <th>Tipo de Atividade</th>
+                        <th>Equipamento Necessário</th>
+                        <th>Funcionário Responsável</th>
+                        <th>Data Máxima</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Atividades ativas preenchidas dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Histórico de Atividades Realizadas -->
+        <div class="section-header">Histórico de Atividades Concluídas</div>
+        <div class="table-container">
+            <table class="table" id="historicoAtividadesTabela">
+                <thead>
+                    <tr>
+                        <th>Nome Atividade</th>
+                        <th>Área de Plantio</th>
+                        <th>Tipo de Atividade</th>
+                        <th>Equipamento Utilizado</th>
+                        <th>Data de Realização</th>
+                        <th>Tempo Gasto</th>
+                        <th>Observações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Histórico de atividades preenchido dinamicamente -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botão Geral de Cadastro de Nova Atividade -->
+        <button class="btn-general" onclick="abrirModalGeral()">Cadastrar Nova Atividade</button>
+
+        <!-- Modal para Cadastrar Nova Atividade -->
+        <div id="modalAtividade" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="fecharModal()">&times;</span>
+                <h3>Cadastrar Nova Atividade</h3>
+                <form id="atividadeForm">
+                    <div class="form-group">
+                        <label for="nomeAtividade" class="form-label">Nome da Atividade:</label>
+                        <input type="text" id="nomeAtividade" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="plantacaoSelecionada" class="form-label">Plantação:</label>
+                        <select id="plantacaoSelecionada" class="form-select" required>
+                            <!-- Opções de plantações serão preenchidas dinamicamente -->
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipoAtividade" class="form-label">Tipo de Atividade:</label>
+                        <select id="tipoAtividade" class="form-select" required>
+                            <option value="aragem">Aragem do Solo</option>
+                            <option value="poda">Poda</option>
+                            <option value="colheita">Colheita</option>
+                            <option value="aplicacao_pesticida">Aplicação de Pesticida</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="equipamento" class="form-label">Equipamento Necessário:</label>
+                        <select id="equipamento" class="form-select" required>
+                            <option value="trator">Trator</option>
+                            <option value="semeadora">Semeadora</option>
+                            <option value="pulverizador">Pulverizador</option>
+                            <option value="arado">Arado</option>
+                            <option value="subsolador">Subsolador</option>
+                            <option value="cortador_grama">Cortador de Grama</option>
+                            <option value="aspirador">Aspirador</option>
+                            <option value="soprador">Soprador</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dataRealizacao" class="form-label">Data de Realização:</label>
+                        <input type="date" id="dataRealizacao" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Cadastrar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let atividadesAtivas = [];
+        let atividadesRealizadas = [];
+        let plantacoes = [];
+        let nomeFuncionario = "João da Silva"; // Exemplo de nome do funcionário
+
+        // Função para carregar plantações e atividades via API
+        async function carregarDados() {
+            try {
+                const responsePlantacoes = await fetch('/api/plantacoes');
+                const plantacoes = await responsePlantacoes.json();
+                exibirPlantacoes(plantacoes);
+        
+                const responseAtivas = await fetch('/api/atividades_ativas');
+                const atividadesAtivas = await responseAtivas.json();
+                exibirAtividadesAtivas(atividadesAtivas);
+        
+                const responseRealizadas = await fetch('/api/atividades_realizadas');
+                const atividadesRealizadas = await responseRealizadas.json();
+                exibirAtividadesRealizadas(atividadesRealizadas);
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+            }
+        }
+        
+        // Função para carregar plantações 
+        async function carregarPlantacoes() {
+            const response = await fetch('/api/Plantacoes');
+            const Plantacoes = await response.json();
+            exibirPlantacoes(plantacoes);
+        }
+
+        // Função para exibir plantações e adicionar botão para cadastrar atividade
+        function exibirPlantacoes(plantacoes) {
+            const tabela = document.getElementById('plantacoesTabela').querySelector('tbody');
+            tabela.innerHTML = '';
+            const plantacaoSelect = document.getElementById('plantacaoSelecionada');
+            plantacaoSelect.innerHTML = ''; // Limpar as opções de plantação no select
+
+            plantacoes.forEach(plantacao => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${plantacao.nome}</td>
+                        <td>${plantacao.area_plantio}</td>
+                        <td>${plantacao.tipo_cultivo}</td>
+                        <td>${plantacao.atividades_realizadas.join(', ')}</td>
+                        <td>${plantacao.equipamento_utilizado}</td>
+                        <td>
+                            <button class="btn-add-atividade" onclick="adicionarAtividade('${plantacao.nome}')">Adicionar Atividade</button>
+                        </td>
+                    </tr>
+                `;
+
+                // Adicionar opções no select do modal
+                const option = document.createElement('option');
+                option.value = plantacao.nome;
+                option.text = plantacao.nome;
+                plantacaoSelect.appendChild(option);
+            });
+        }
+
+        // Função para carregar atividades ativas
+        async function carregarAtividadesAtivas() {
+            const response = await fetch('/api/atividades_ativas');
+            const atividadesAtivas = await response.json();
+            exibirAtividadesAtivas(atividadesAtivas);
+        }
+
+        // Função para exibir atividades ativas
+        function exibirAtividadesAtivas(atividades) {
+            const tabela = document.getElementById('atividadesAtivasTabela').querySelector('tbody');
+            tabela.innerHTML = '';
+            atividades.forEach(atividade => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${atividade.nome}</td>
+                        <td>${atividade.area_plantio}</td>
+                        <td>${atividade.tipo}</td>
+                        <td>${atividade.equipamento.join(', ')}</td>
+                        <td>${atividade.funcionario}</td>
+                        <td>${atividade.data_maxima}</td>
+                        <td>
+                            ${atividade.status === 'pendente' ? `<button class="btn btn-success" onclick="fazerCheckin(${atividade.id})">Check-in</button>` : ''}
+                            ${atividade.status === 'em_progresso' ? `<button class="btn btn-danger" onclick="fazerCheckout(${atividade.id})">Check-out</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        //// Função para carregar atividades realizadas
+        async function carregarAtividadesRealizadas() {
+            const response = await fetch('/api/atividades_realizadas');
+            const atividadesRealizadas = await response.json();
+            exibirAtividadesRealizadas(atividadesRealizadas);
+        }
+        
+
+        // Função para exibir atividades realizadas
+        function exibirAtividadesRealizadas(atividades) {
+            const tabela = document.getElementById('historicoAtividadesTabela').querySelector('tbody');
+            tabela.innerHTML = '';
+            atividades.forEach(atividade => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${atividade.nome}</td>
+                        <td>${atividade.area_plantio}</td>
+                        <td>${atividade.tipo}</td>
+                        <td>${atividade.equipamento.join(', ')}</td>
+                        <td>${atividade.data_realizacao}</td>
+                        <td>${atividade.tempo_gasto}</td>
+                        <td>${atividade.observacoes || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // função para verificar disponibilidade de equipamento
+        async function fazerCheckin(id) {
+            try {
+                const responseEquipamentos = await fetch('/api/equipamentos_disponiveis');
+                const equipamentosDisponiveis = await responseEquipamentos.json();
+        
+                const atividade = atividadesAtivas.find(a => a.id === id);
+                const equipamentosNecessarios = atividade.equipamento;
+        
+                const indisponiveis = equipamentosNecessarios.filter(equip => !equipamentosDisponiveis.includes(equip));
+        
+                if (indisponiveis.length > 0) {
+                    document.getElementById('alertaDisponibilidade').style.display = 'block';
+                    return;
+                }
+        
+                const response = await fetch(`/api/checkin/${id}`, {
+                    method: 'POST'
+                });
+        
+                if (response.ok) {
+                    document.getElementById('alertaDisponibilidade').style.display = 'none';
+                    document.getElementById('alertaCheckinSucesso').style.display = 'block';
+                    carregarDados(); // Recarregar as atividades
+                } else {
+                    alert('Erro ao realizar check-in');
+                }
+            } catch (error) {
+                console.error('Erro ao fazer check-in:', error);
+            }
+        }
+        
+
+        // Função para abrir o modal para cadastro de atividade específica de uma plantação
+        function adicionarAtividade(nomePlantacao) {
+            document.getElementById('modalAtividade').style.display = 'flex';
+            document.getElementById('plantacaoSelecionada').value = nomePlantacao; // Define automaticamente o nome da plantação
+        }
+
+        // Função para abrir o modal de cadastro geral (sem definir plantação previamente)
+        function abrirModalGeral() {
+            document.getElementById('modalAtividade').style.display = 'flex';
+            document.getElementById('plantacaoSelecionada').value = ''; // Limpa o campo para escolher uma plantação
+        }
+
+        // Função para fechar o modal
+        function fecharModal() {
+            document.getElementById('modalAtividade').style.display = 'none';
+        }
+
+        async function fazerCheckin(id) {
+            try {
+                const responseEquipamentos = await fetch('/api/equipamentos_disponiveis');
+                const equipamentosDisponiveis = await responseEquipamentos.json();
+
+                const atividade = atividadesAtivas.find(a => a.id === id);
+                const equipamentosNecessarios = atividade.equipamento;
+
+                const equipamentosIndisponiveis = equipamentosNecessarios.filter(equip => !equipamentosDisponiveis.includes(equip));
+
+                if (equipamentosIndisponiveis.length > 0) {
+                    document.getElementById('alertaDisponibilidade').style.display = 'block';
+                    document.getElementById('alertaCheckinSucesso').style.display = 'none';
+                    return;
+                }
+
+                const response = await fetch(`/api/checkin/${id}`, { method: 'POST' });
+                if (response.ok) {
+                    document.getElementById('alertaDisponibilidade').style.display = 'none';
+                    document.getElementById('alertaCheckinSucesso').style.display = 'block';
+                    carregarDados();
+                } else {
+                    alert('Erro ao realizar check-in.');
+                }
+            } catch (error) {
+                console.error('Erro ao fazer check-in:', error);
+            }
+        }
+
+        // função de fazer checkout ao finalizar ou pausar uma atividade
+        async function fazerCheckout(id) {
+            const observacoes = prompt('Deseja adicionar alguma observação? (opcional)');
+            const tipoCheckout = prompt('Você deseja concluir ou pausar a atividade? (concluida/pausa)');
+            
+            const response = await fetch(`/api/checkout/${id}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ observacoes, tipoCheckout })
+            });
+        
+            if (response.ok) {
+                alert('Check-out realizado com sucesso.');
+                carregarDados(); // Recarregar as atividades
+            } else {
+                alert('Erro ao realizar check-out.');
+            }
+        }        
+
+        //cadastrar nova atividade
+        document.getElementById('atividadeForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+        
+            const data = {
+                nomeAtividade: document.getElementById('nomeAtividade').value,
+                plantacaoSelecionada: document.getElementById('plantacaoSelecionada').value,
+                tipoAtividade: document.getElementById('tipoAtividade').value,
+                equipamento: document.getElementById('equipamento').value,
+                dataRealizacao: document.getElementById('dataRealizacao').value
+            };
+        
+            const response = await fetch('/api/atividades', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        
+            if (response.ok) {
+                alert('Atividade cadastrada com sucesso!');
+                window.location.reload(); // Recarregar a página para atualizar as atividades
+            } else {
+                alert('Erro ao cadastrar atividade');
+            }
+        });
+
+        // função para regarregar os dados apos o check-in, check-out ou cadastro de uma nova atividade
+        function carregarDados() {
+            carregarAtividadesAtivas();
+            carregarAtividadesRealizadas();
+            carregarPlantacoes(); // Se estiver relacionado ao funcionário
+        }
+        
+        
+        
+
+        window.onload = carregarDados;
+    </script>
+</body>
+</html>

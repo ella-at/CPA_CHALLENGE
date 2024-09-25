@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciar Áreas de Plantio</title>
+    <link rel="icon" href="/static/img/favicon.png" type="image/png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e8efe8;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+        .center {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .center button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+        .center button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+        th, td {
+            padding: 20px;
+            text-align: left;
+        }
+        th {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        td {
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        td a {
+            text-decoration: none;
+        }
+        td button {
+            padding: 8px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 0.9em;
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+        td button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        .center a {
+            text-decoration: none;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Gerenciar Áreas de Plantio</h1>
+
+<!-- Botão para adicionar uma nova área -->
+<div class="center">
+    <a href="#" id="addAreaBtn">
+        <button>Adicionar Nova Área de Plantio</button>
+    </a>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nome da Área</th>
+            <th>Tamanho (ha)</th>
+            <th>Tipo de Solo</th>
+            <th>Rotação de Culturas</th>
+            <th>Tipo de Irrigação</th>
+            <th>Tecnologia</th>
+            <th>Pragas</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody id="areasTableBody">
+        <!-- Linhas serão adicionadas dinamicamente -->
+    </tbody>
+</table>
+
+<div class="center">
+    <a href="/">
+        <button>Voltar ao Menu</button>
+    </a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const areasTableBody = document.getElementById('areasTableBody');
+
+        // Dados simulados iniciais (se não houver dados no LocalStorage)
+        const initialAreas = [
+            { id: 1, nome: 'Área 1', tamanho: 100, solo: 'Argiloso', rotacao: true, irrigacao: 'Gotejamento', tecnologia: 'Drones', pragas: 'Nenhuma' },
+            { id: 2, nome: 'Área 2', tamanho: 200, solo: 'Arenoso', rotacao: false, irrigacao: 'Aspersão', tecnologia: 'Sensores', pragas: 'Lagarta' },
+        ];
+
+        // Função para carregar áreas de plantio do LocalStorage
+        function loadAreas() {
+            const areas = JSON.parse(localStorage.getItem('areas')) || initialAreas;
+            areasTableBody.innerHTML = ''; // Limpar tabela antes de recarregar
+            areas.forEach(area => addAreaToTable(area));
+        }
+
+        // Função para adicionar área à tabela
+        function addAreaToTable(area) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${area.nome}</td>
+                <td>${area.tamanho}</td>
+                <td>${area.solo}</td>
+                <td>${area.rotacao ? 'Sim' : 'Não'}</td>
+                <td>${area.irrigacao}</td>
+                <td>${area.tecnologia}</td>
+                <td>${area.pragas || 'Nenhuma'}</td>
+                <td>
+                    <a href="/nova_plantacao">
+                        <button>Adicionar Nova Plantação</button>
+                    </a>
+                    <a href="/ver_plantacao">
+                        <button>Ver Plantações</button>
+                    </a>
+                </td>
+            `;
+            areasTableBody.appendChild(row);
+        }
+
+        // Função para adicionar nova área
+        document.getElementById('addAreaBtn').addEventListener('click', function() {
+            const novaArea = {
+                id: Date.now(),
+                nome: `Área ${Math.floor(Math.random() * 100)}`,
+                tamanho: Math.floor(Math.random() * 1000),
+                solo: 'Arenoso',
+                rotacao: Math.random() > 0.5,
+                irrigacao: 'Gotejamento',
+                tecnologia: 'Sensores',
+                pragas: 'Nenhuma',
+            };
+            const areas = JSON.parse(localStorage.getItem('areas')) || initialAreas;
+            areas.push(novaArea);
+            localStorage.setItem('areas', JSON.stringify(areas));
+            loadAreas();  // Recarregar a tabela com a nova área
+        });
+
+        // Carregar áreas ao iniciar a página
+        loadAreas();
+    });
+</script>
+
+</body>
+</html>

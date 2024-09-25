@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Logística</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Para gráficos -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: rgb(236, 255, 229);
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background-color: #f8fff0;
+            padding: 20px;
+            width: 95%;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .form-container, .chart-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .form-group .col {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .btn-primary, .btn-success, .btn-danger {
+            background-color: #4caf50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-success:hover, .btn-danger:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f8f8f8;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        td {
+            font-size: 14px;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        .charts-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+        }
+
+        canvas {
+            margin: 20px auto;
+            display: block;
+            max-width: 100%;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .charts-wrapper {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .form-group .col {
+                min-width: 100%;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Título Principal -->
+        <div class="section-header">Gestão de Logística de Safras</div>
+
+        <!-- Cadastro de Transporte -->
+        <div class="form-container">
+            <h4>Cadastrar Transporte</h4>
+            <form id="transporteForm">
+                <div class="form-group">
+                    <div class="col">
+                        <label for="tipoTransporte">Tipo de Transporte:</label>
+                        <select id="tipoTransporte">
+                            <option value="caminhao">Caminhão</option>
+                            <option value="carreta">Carreta</option>
+                            <option value="van">Van</option>
+                            <option value="carro_utilitario">Carro Utilitário</option>
+                            <!-- Adicione mais opções conforme necessário -->
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="capacidade">Capacidade Máxima (kg):</label>
+                        <input type="number" id="capacidade" required>
+                    </div>
+                    <div class="col">
+                        <label for="placaVeiculo">Placa do Veículo:</label>
+                        <input type="text" id="placaVeiculo" required>
+                    </div>
+                    <div class="col">
+                        <label for="nomeMotorista">Nome do Motorista:</label>
+                        <input type="text" id="nomeMotorista" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Cadastrar Transporte</button>
+            </form>
+        </div>
+
+        <!-- Lista de Transportes Cadastrados -->
+        <div class="form-container">
+            <h4>Transportes Disponíveis</h4>
+            <table id="transportesTable">
+                <thead>
+                    <tr>
+                        <th>Tipo de Transporte</th>
+                        <th>Capacidade Máxima</th>
+                        <th>Placa do Veículo</th>
+                        <th>Motorista</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Conteúdo dinâmico -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Cadastro de Entrega -->
+        <div class="form-container">
+            <h4>Cadastrar Entrega</h4>
+            <form id="entregaForm">
+                <div class="form-group">
+                    <div class="col">
+                        <label for="produto">Produto Vendido:</label>
+                        <select id="produto">
+                            <option value="Milho">Milho</option>
+                            <option value="Soja">Soja</option>
+                            <option value="Trigo">Trigo</option>
+                            <!-- Adicione mais produtos dinamicamente -->
+                        </select>
+                    </div>
+                    <div class="col">
+                        <label for="quantidade">Quantidade (kg):</label>
+                        <input type="number" id="quantidade" required>
+                    </div>
+                    <div class="col">
+                        <label for="comprador">Comprador:</label>
+                        <input type="text" id="comprador" required>
+                    </div>
+                    <div class="col">
+                        <label for="enderecoEntrega">Endereço de Entrega:</label>
+                        <input type="text" id="enderecoEntrega" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Cadastrar Entrega</button>
+            </form>
+        </div>
+
+        <!-- Lista de Entregas Cadastradas -->
+        <div class="form-container">
+            <h4>Entregas Cadastradas</h4>
+            <table id="entregasTable">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Quantidade (kg)</th>
+                        <th>Comprador</th>
+                        <th>Status da Entrega</th>
+                        <th>Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Conteúdo dinâmico -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Gráficos e Relatórios de Transporte -->
+        <div class="section-header">Relatórios de Transporte</div>
+        <div class="charts-wrapper">
+            <!-- Gráfico de Uso de Transporte -->
+            <div class="chart-container">
+                <h4>Uso de Transporte por Tipo</h4>
+                <canvas id="graficoTransporte"></canvas>
+            </div>
+
+            <!-- Gráfico de Safras Entregues -->
+            <div class="chart-container">
+                <h4>Safras Entregues por Mês</h4>
+                <canvas id="graficoEntregas"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Arrays para armazenar dados de transportes e entregas
+        let transportes = [];
+        let entregas = [];
+
+        // Função para cadastrar novo transporte
+        document.getElementById('transporteForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const tipoTransporte = document.getElementById('tipoTransporte').value;
+            const capacidade = document.getElementById('capacidade').value;
+            const placaVeiculo = document.getElementById('placaVeiculo').value;
+            const nomeMotorista = document.getElementById('nomeMotorista').value;
+
+            transportes.push({ tipoTransporte, capacidade, placaVeiculo, nomeMotorista });
+            atualizarTabelaTransportes();
+        });
+
+                // Função para atualizar a tabela de transportes
+                function atualizarTabelaTransportes() {
+                    const tabela = document.getElementById('transportesTable').querySelector('tbody');
+                    tabela.innerHTML = '';
+        
+                    transportes.forEach((transporte, index) => {
+                        tabela.innerHTML += `
+                            <tr>
+                                <td>${transporte.tipoTransporte}</td>
+                                <td>${transporte.capacidade} kg</td>
+                                <td>${transporte.placaVeiculo}</td>
+                                <td>${transporte.nomeMotorista}</td>
+                                <td><button class="btn-danger" onclick="excluirTransporte(${index})">Excluir</button></td>
+                            </tr>
+                        `;
+                    });
+                }
+        
+                // Função para excluir transporte
+                function excluirTransporte(index) {
+                    transportes.splice(index, 1);
+                    atualizarTabelaTransportes();
+                }
+        
+                // Função para cadastrar nova entrega
+                document.getElementById('entregaForm').addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    const produto = document.getElementById('produto').value;
+                    const quantidade = document.getElementById('quantidade').value;
+                    const comprador = document.getElementById('comprador').value;
+                    const enderecoEntrega = document.getElementById('enderecoEntrega').value;
+        
+                    // Simulação de tempo de entrega (por exemplo, baseado na distância)
+                    const tempoEntrega = calcularTempoEntrega(enderecoEntrega);
+        
+                    entregas.push({ produto, quantidade, comprador, enderecoEntrega, tempoEntrega, status: 'Pendente' });
+                    atualizarTabelaEntregas();
+                });
+        
+                // Função para calcular o tempo de entrega (simulação de tempo em horas)
+                function calcularTempoEntrega(endereco) {
+                    // Simulação de cálculo de tempo com base no endereço. Aqui, pode ser usado algum serviço de mapa ou cálculo de distância real.
+                    const destinosProximos = ['Cidade A', 'Cidade B']; // Simulando cidades próximas
+                    return destinosProximos.includes(endereco) ? '2 horas' : '6 horas';
+                }
+        
+                // Função para atualizar a tabela de entregas
+                function atualizarTabelaEntregas() {
+                    const tabela = document.getElementById('entregasTable').querySelector('tbody');
+                    tabela.innerHTML = '';
+        
+                    entregas.forEach((entrega, index) => {
+                        tabela.innerHTML += `
+                            <tr>
+                                <td>${entrega.produto}</td>
+                                <td>${entrega.quantidade} kg</td>
+                                <td>${entrega.comprador}</td>
+                                <td>${entrega.tempoEntrega}</td>
+                                <td>${entrega.status}</td>
+                                <td><button class="btn-success" onclick="atualizarStatusEntrega(${index})">Marcar como Entregue</button></td>
+                                <td><button class="btn-danger" onclick="excluirEntrega(${index})">Excluir</button></td>
+                            </tr>
+                        `;
+                    });
+                }
+        
+                // Função para atualizar o status de entrega
+                function atualizarStatusEntrega(index) {
+                    entregas[index].status = 'Entregue';
+                    atualizarTabelaEntregas();
+                }
+        
+                // Função para excluir entrega
+                function excluirEntrega(index) {
+                    entregas.splice(index, 1);
+                    atualizarTabelaEntregas();
+                }
+        
+                // Função para gerar gráficos usando Chart.js
+                function gerarGraficos() {
+                    // Gráfico de Uso de Transporte por Tipo
+                    const ctxTransporte = document.getElementById('graficoTransporte').getContext('2d');
+                    new Chart(ctxTransporte, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Caminhão', 'Carreta', 'Van', 'Carro Utilitário'],
+                            datasets: [{
+                                label: 'Número de Transportes',
+                                data: [5, 3, 2, 1], // Dados simulados
+                                backgroundColor: ['#3498db', '#2ecc71', '#f1c40f', '#e74c3c']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+        
+                    // Gráfico de Safras Entregues por Mês
+                    const ctxEntregas = document.getElementById('graficoEntregas').getContext('2d');
+                    new Chart(ctxEntregas, {
+                        type: 'line',
+                        data: {
+                            labels: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio'],
+                            datasets: [{
+                                label: 'Entregas de Safras',
+                                data: [10, 15, 8, 12, 20], // Dados simulados
+                                borderColor: '#2ecc71',
+                                fill: false,
+                                tension: 0.4
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+
+                //cadastro de transporte
+                document.getElementById('transporteForm').addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                
+                    const data = {
+                        tipo_transporte: document.getElementById('tipoTransporte').value,
+                        capacidade: document.getElementById('capacidade').value,
+                        placa_veiculo: document.getElementById('placaVeiculo').value,
+                        nome_motorista: document.getElementById('nomeMotorista').value
+                    };
+                
+                    const response = await fetch('/api/logistica', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                
+                    if (response.ok) {
+                        alert('Transporte cadastrado com sucesso!');
+                        window.location.reload(); // Recarregar a lista de transportes
+                    } else {
+                        alert('Erro ao cadastrar transporte');
+                    }
+                });
+
+
+                // cadastro de entrega
+                document.getElementById('entregaForm').addEventListener('submit', async function(event) {
+                    event.preventDefault();
+                
+                    const data = {
+                        produto: document.getElementById('produto').value,
+                        quantidade: document.getElementById('quantidade').value,
+                        comprador: document.getElementById('comprador').value,
+                        endereco_entrega: document.getElementById('enderecoEntrega').value
+                    };
+                
+                    const response = await fetch('/api/entrega', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+                
+                    if (response.ok) {
+                        alert('Entrega cadastrada com sucesso!');
+                        window.location.reload(); // Recarregar a lista de entregas
+                    } else {
+                        alert('Erro ao cadastrar entrega');
+                    }
+                });
+                
+
+                
+        
+                // Carregar gráficos e tabelas ao iniciar a página
+                window.onload = function() {
+                    atualizarTabelaTransportes();
+                    atualizarTabelaEntregas();
+                    gerarGraficos();
+                };
+            </script>
+        </body>
+        </html>
+        

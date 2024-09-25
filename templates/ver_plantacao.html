@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Plantação</title>
+    <link rel="icon" href="/static/img/favicon.png" type="image/png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e8efe8;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 40px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        table thead {
+            background-color: #4CAF50;
+            color: white;
+        }
+        th, td {
+            padding: 20px;
+            text-align: left;
+        }
+        th {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
+        td {
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .center {
+            text-align: center;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+    </style>
+</head>
+<body>
+
+<h1>Plantação</h1>
+
+<table>
+    <thead>
+        <tr>
+            <th>Nome do Cultivo</th>
+            <th>Cultura</th>
+            <th>Data de Plantio</th>
+            <th>Data de Colheita</th>
+            <th>Funcionário Responsável</th>
+            <th>Fertilização</th>
+            <th>Uso de Pesticida</th>
+            <th>Frequência de Irrigação</th>
+        </tr>
+    </thead>
+    <tbody id="plantacaoTableBody">
+        <!-- Linhas serão inseridas aqui dinamicamente -->
+    </tbody>
+</table>
+
+<div class="center">
+    <a href="/areas_plantio">
+        <button>Voltar às Áreas de Plantio</button>
+    </a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const plantacaoTableBody = document.getElementById('plantacaoTableBody');
+        const plantacaoId = window.location.pathname.split("/").pop();  // Pegar o ID da URL
+
+        // Função para buscar os dados da plantação no servidor via API
+        fetch(`/api/ver_plantacao/${plantacaoId}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Erro ao buscar dados da plantação");
+                }
+                return response.json();
+            })
+            .then(plantacao => {
+                // Montar a tabela com os dados da plantação
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${plantacao.nomeCultivo}</td>
+                    <td>${plantacao.cultura}</td>
+                    <td>${plantacao.dataPlantio}</td>
+                    <td>${plantacao.dataColheita}</td>
+                    <td>${plantacao.funcionario}</td>
+                    <td>${plantacao.fertilizacao}</td>
+                    <td>${plantacao.pesticida}</td>
+                    <td>${plantacao.irrigacao}</td>
+                `;
+                plantacaoTableBody.appendChild(row);
+            })
+            .catch((error) => {
+                console.error('Erro ao buscar plantação:', error);
+                plantacaoTableBody.innerHTML = '<tr><td colspan="8">Erro ao carregar os dados da plantação.</td></tr>';
+            });
+    });
+</script>
+
+</body>
+</html>

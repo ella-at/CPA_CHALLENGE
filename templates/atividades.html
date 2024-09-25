@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Atividades</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            background-color: #f8fff0;
+            padding: 20px;
+            width: 95%;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .main-panel, .side-panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-header {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .table-container {
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f4f4f4;
+            font-size: 16px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        td {
+            font-size: 14px;
+            color: #333;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .btn-success, .btn-view {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-success:hover, .btn-view:hover {
+            background-color: #218838;
+            transform: translateY(-3px);
+        }
+
+        .btn-success {
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 300px;
+        }
+
+        .list-group {
+            background-color: #f4f4f4;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .list-group-item {
+            padding: 10px;
+            font-size: 14px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #333;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            width: 100%;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-success, .btn-view {
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            th, td {
+                padding: 10px;
+                font-size: 12px;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Painel principal de atividades -->
+        <div class="main-panel">
+            <div class="section-header">Atividades Ativas</div>
+            <div class="table-container">
+                <table class="table" id="atividadesAtivasTabela">
+                    <thead>
+                        <tr>
+                            <th>Nome da Atividade</th>
+                            <th>Área de Plantio</th>
+                            <th>Tipo de Atividade</th>
+                            <th>Equipamento Necessário</th>
+                            <th>Funcionário Responsável</th>
+                            <th>Data Máxima</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Atividades ativas preenchidas dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="section-header">Histórico de Atividades Concluídas</div>
+            <div class="table-container">
+                <table class="table" id="atividadesConcluidasTabela">
+                    <thead>
+                        <tr>
+                            <th>Nome da Atividade</th>
+                            <th>Área de Plantio</th>
+                            <th>Tipo de Atividade</th>
+                            <th>Equipamento Utilizado</th>
+                            <th>Funcionário Responsável</th>
+                            <th>Data de Realização</th>
+                            <th>Tempo Gasto</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Atividades concluídas preenchidas dinamicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Botão para cadastrar nova atividade -->
+            <button class="btn-success" onclick="abrirModalGeral()">Cadastrar Nova Atividade</button>
+        </div>
+
+        <!-- Painel lateral -->
+        <div class="side-panel">
+            <!-- Lista de Funcionários -->
+            <div class="list-group">
+                <div class="section-header">Funcionários</div>
+                <div id="listaFuncionarios">
+                    <!-- Funcionários preenchidos dinamicamente -->
+                </div>
+            </div>
+
+            <!-- Gráfico de Desempenho -->
+            <div class="chart-container">
+                <canvas id="graficoDesempenho"></canvas>
+            </div>
+
+            <!-- Relatório ao lado -->
+            <div class="list-group">
+                <div class="section-header">Relatório de Atividades</div>
+                <div id="relatorioAtividades">
+                    <!-- Relatório preenchido dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para Cadastrar Nova Atividade -->
+    <div id="modalAtividade" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModal()">&times;</span>
+            <h3>Cadastrar Nova Atividade</h3>
+            <form id="atividadeForm">
+                <div class="form-group">
+                    <label for="nomeAtividade" class="form-label">Nome da Atividade:</label>
+                    <input type="text" id="nomeAtividade" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="plantacaoSelecionada" class="form-label">Plantação:</label>
+                    <select id="plantacaoSelecionada" class="form-select" required>
+                        <!-- Opções de plantações serão preenchidas dinamicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tipoAtividade" class="form-label">Tipo de Atividade:</label>
+                    <select id="tipoAtividade" class="form-select" required>
+                        <option value="aragem">Aragem do Solo</option>
+                        <option value="poda">Poda</option>
+                        <option value="colheita">Colheita</option>
+                        <option value="aplicacao_pesticida">Aplicação de Pesticida</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="equipamento" class="form-label">Equipamento Necessário:</label>
+                    <select id="equipamento" class="form-select" multiple required></select>
+                </div>
+                <div class="form-group">
+                    <label for="dataRealizacao" class="form-label">Data de Realização:</label>
+                    <input type="date" id="dataRealizacao" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-success">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+         let atividadesAtivas = [
+            {
+                id: 1,
+                nome: "Aragem do Solo",
+                area_plantio: "Fazenda 1",
+                tipo: "Aragem",
+                equipamento: ["Trator", "Arado"],
+                funcionario: "João",
+                data_maxima: "2023-10-10",
+                status: "pendente"
+            },
+            {
+                id: 2,
+                nome: "Poda das Árvores",
+                area_plantio: "Fazenda 2",
+                tipo: "Poda",
+                equipamento: ["Tesoura", "Escada"],
+                funcionario: "Maria",
+                data_maxima: "2023-10-15",
+                status: "em_progresso"
+            }
+        ];
+
+        let atividadesConcluidas = [
+            {
+                id: 3,
+                nome: "Colheita de Milho",
+                area_plantio: "Fazenda 3",
+                tipo: "Colheita",
+                equipamento: ["Colheitadeira"],
+                funcionario: "Carlos",
+                data_realizacao: "2023-09-30",
+                tempo_gasto: "5 horas"
+            },
+            {
+                id: 4,
+                nome: "Aplicação de Pesticida",
+                area_plantio: "Fazenda 1",
+                tipo: "Aplicação de Pesticida",
+                equipamento: ["Pulverizador"],
+                funcionario: "Ana",
+                data_realizacao: "2023-09-25",
+                tempo_gasto: "3 horas"
+            }
+        ];
+
+        let funcionarios = [
+            { id: 1, nome: "João" },
+            { id: 2, nome: "Maria" },
+            { id: 3, nome: "Carlos" },
+            { id: 4, nome: "Ana" }
+        ];
+
+        // Função para exibir atividades ativas
+        function exibirAtividadesAtivas(atividades) {
+            const tabela = document.getElementById('atividadesAtivasTabela').querySelector('tbody');
+            tabela.innerHTML = '';
+            atividades.forEach(atividade => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${atividade.nome}</td>
+                        <td>${atividade.area_plantio}</td>
+                        <td>${atividade.tipo}</td>
+                        <td>${atividade.equipamento.join(', ')}</td>
+                        <td>${atividade.funcionario}</td>
+                        <td>${atividade.data_maxima}</td>
+                        <td>
+                            ${atividade.status === 'pendente' ? `<button class="btn btn-success" onclick="fazerCheckin(${atividade.id})">Check-in</button>` : ''}
+                            ${atividade.status === 'em_progresso' ? `<button class="btn btn-danger" onclick="fazerCheckout(${atividade.id})">Check-out</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Função para exibir atividades concluídas
+        function exibirAtividadesConcluidas(atividades) {
+            const tabela = document.getElementById('atividadesConcluidasTabela').querySelector('tbody');
+            tabela.innerHTML = '';
+            atividades.forEach(atividade => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${atividade.nome}</td>
+                        <td>${atividade.area_plantio}</td>
+                        <td>${atividade.tipo}</td>
+                        <td>${atividade.equipamento.join(', ')}</td>
+                        <td>${atividade.funcionario}</td>
+                        <td>${atividade.data_realizacao}</td>
+                        <td>${atividade.tempo_gasto}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Função para exibir funcionários
+        function exibirFuncionarios(funcionarios) {
+            const lista = document.getElementById('listaFuncionarios');
+            lista.innerHTML = '';
+            funcionarios.forEach(funcionario => {
+                lista.innerHTML += `
+                    <div class="list-group-item">
+                        <span>${funcionario.nome}</span>
+                        <button class="btn-view" onclick="verResponsabilidades(${funcionario.id})">Ver Atividades</button>
+                    </div>
+                `;
+            });
+        }
+
+        // Função para abrir modal de cadastro de nova atividade
+        function abrirModalGeral() {
+            document.getElementById('modalAtividade').style.display = 'flex';
+        }
+
+        // Função para fechar modal
+        function fecharModal() {
+            document.getElementById('modalAtividade').style.display = 'none';
+        }
+
+        // Função para atualizar gráfico de desempenho
+        function atualizarGraficoDesempenho() {
+            const ctx = document.getElementById('graficoDesempenho').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Concluídas', 'Ativas', 'Atrasadas'],
+                    datasets: [{
+                        label: 'Desempenho de Atividades',
+                        data: [atividadesConcluidas.length, atividadesAtivas.length, 5], // Exemplo de dados simulados
+                        backgroundColor: ['#28a745', '#007bff', '#dc3545'],
+                        borderColor: ['#218838', '#0056b3', '#c82333'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Função para atualizar relatório
+        function atualizarRelatorio() {
+            const relatorio = document.getElementById('relatorioAtividades');
+            relatorio.innerHTML = `
+                <p>Total de Atividades Ativas: ${atividadesAtivas.length}</p>
+                <p>Total de Atividades Concluídas: ${atividadesConcluidas.length}</p>
+                <p>Atividades Atrasadas: 5</p> <!-- Exemplo -->
+            `;
+        }
+
+        // Carregar dados simulados ao iniciar a página
+        window.onload = function() {
+            exibirAtividadesAtivas(atividadesAtivas);
+            exibirAtividadesConcluidas(atividadesConcluidas);
+            exibirFuncionarios(funcionarios);
+            atualizarGraficoDesempenho();
+            atualizarRelatorio();
+        };
+    
+        // Carregar dados ao iniciar a página
+        window.onload = carregarDados;
+    </script>
+</body>
+</html>

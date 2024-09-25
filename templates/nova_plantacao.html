@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastrar Nova Plantação</title>
+    <link rel="icon" href="/static/img/favicon.png" type="image/png">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e8efe8;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 2.5em;
+            margin-bottom: 40px;
+        }
+        .form-container {
+            margin: 0 auto;
+            max-width: 600px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="number"], input[type="date"], textarea, select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 12px 25px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: background-color 0.3s ease, transform 0.2s;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+            transform: translateY(-3px);
+        }
+        .center {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Cadastrar Nova Plantação</h1>
+
+<div class="form-container">
+    <form id="plantacaoForm">
+        <label for="nomeCultivo">Nome do Cultivo:</label>
+        <input type="text" id="nomeCultivo" required>
+
+        <label for="cultura">Cultura (Sementes):</label>
+        <select id="cultura" required>
+            <option value="Milho">Milho</option>
+            <option value="Soja">Soja</option>
+            <option value="Trigo">Trigo</option>
+            <option value="Café">Café</option>
+            <option value="Cana-de-Açúcar">Cana-de-Açúcar</option>
+        </select>
+
+        <label for="dataPlantio">Data de Plantio:</label>
+        <input type="date" id="dataPlantio" required>
+
+        <label for="dataColheita">Data de Colheita Prevista:</label>
+        <input type="date" id="dataColheita" required>
+
+        <label for="funcionario">Funcionário Responsável:</label>
+        <select id="funcionario" required></select>
+
+        <label for="fertilizacao">Fertilização:</label>
+        <select id="fertilizacao" required>
+            <option value="Adubo Orgânico">Adubo Orgânico</option>
+            <option value="NPK">NPK</option>
+            <option value="Fertilizante Líquido">Fertilizante Líquido</option>
+            <option value="Fertilizante Granulado">Fertilizante Granulado</option>
+        </select>
+
+        <label for="pesticida">Uso de Pesticida:</label>
+        <select id="pesticida" required>
+            <option value="Sim">Sim</option>
+            <option value="Não">Não</option>
+        </select>
+
+        <label for="irrigacao">Frequência de Irrigação:</label>
+        <select id="irrigacao" required>
+            <option value="Diariamente">Diariamente</option>
+            <option value="Semanalmente">Semanalmente</option>
+            <option value="Mensalmente">Mensalmente</option>
+        </select>
+
+        <button type="submit">Cadastrar Plantação</button>
+    </form>
+</div>
+
+<div class="center">
+    <a href="/areas_plantio">
+        <button>Voltar às Áreas de Plantio</button>
+    </a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('plantacaoForm');
+
+        // Função para carregar funcionários simulados
+        function loadFuncionarios() {
+            const funcionarios = JSON.parse(localStorage.getItem('funcionarios')) || [
+                { id: 1, nome: 'João da Silva' },
+                { id: 2, nome: 'Maria Souza' },
+                { id: 3, nome: 'Carlos Pereira' }
+            ];
+            const funcionarioSelect = document.getElementById('funcionario');
+            funcionarios.forEach(func => {
+                const option = document.createElement('option');
+                option.value = func.nome;
+                option.textContent = func.nome;
+                funcionarioSelect.appendChild(option);
+            });
+        }
+
+        // Função para salvar a nova plantação
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const plantacao = {
+                id: Date.now(),
+                nomeCultivo: document.getElementById('nomeCultivo').value,
+                cultura: document.getElementById('cultura').value,
+                dataPlantio: document.getElementById('dataPlantio').value,
+                dataColheita: document.getElementById('dataColheita').value,
+                funcionario: document.getElementById('funcionario').value,
+                fertilizacao: document.getElementById('fertilizacao').value,
+                pesticida: document.getElementById('pesticida').value,
+                irrigacao: document.getElementById('irrigacao').value
+            };
+
+            // Simular salvamento no LocalStorage
+            const plantacoes = JSON.parse(localStorage.getItem('plantacoes')) || [];
+            plantacoes.push(plantacao);
+            localStorage.setItem('plantacoes', JSON.stringify(plantacoes));
+
+            // Enviar dados para o back-end via API
+            fetch('/api/salvar_plantacao', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(plantacao)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Dados enviados ao servidor:', data);
+                window.location.href = `/ver_plantacao}`;  // Redirecionar para ver a plantação
+            })
+            .catch((error) => {
+                console.error('Erro ao enviar dados para o servidor:', error);
+            });
+        });
+
+        // Carregar funcionários ao iniciar a página
+        loadFuncionarios();
+    });
+</script>
+
+</body>
+</html>

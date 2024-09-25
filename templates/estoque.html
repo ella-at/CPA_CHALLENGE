@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Estoque</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Para futuros gráficos, se necessário -->
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Gerenciamento de Estoque</h1>
+
+        <!-- Filtro por tipo de item -->
+        <div class="mb-3">
+            <label for="filtroTipo" class="form-label">Filtrar por tipo de item</label>
+            <select id="filtroTipo" class="form-select" onchange="filtrarTipo()">
+                <option value="todos">Todos</option>
+                <option value="semente">Semente</option>
+                <option value="fertilizante">Fertilizante</option>
+                <option value="pesticida">Pesticida</option>
+                <!-- Adicione mais tipos conforme necessário -->
+            </select>
+        </div>
+
+        <!-- Botão para cadastrar novo insumo -->
+        <div class="mb-3">
+            <a href="/cadastro_estoque" class="btn btn-success">Cadastrar Novo Insumo</a>
+        </div>
+
+        <!-- Tabela de Itens Cadastrados -->
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Quantidade</th>
+                    <th>Data de Cadastro</th>
+                    <th>Data de Expiração</th>
+                    <th>Valor Unitário (R$)</th>
+                    <th>Valor Total (R$)</th>
+                    <th>Lucro Estimado (R$)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody id="estoqueTabela">
+                <!-- Itens serão preenchidos dinamicamente -->
+            </tbody>
+        </table>
+
+        <!-- Relatório de Resumo -->
+        <h3>Resumo Total por Tipo de Insumo</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Tipo</th>
+                    <th>Quantidade Total</th>
+                    <th>Valor Pago (R$)</th>
+                    <th>Lucro Estimado Total (R$)</th>
+                </tr>
+            </thead>
+            <tbody id="resumoTabela">
+                <!-- Relatório será preenchido dinamicamente -->
+            </tbody>
+        </table>
+    </div>
+ 
+    <script>
+        let estoque = JSON.parse(localStorage.getItem('estoque')) || [];  // Variável para armazenar os dados do estoque localmente
+
+        // Função para carregar os dados do estoque via API e atualizar o LocalStorage
+        async function carregarEstoque() {
+            const response = await fetch('/api/dashboard');
+            const data = await response.json();
+            estoque = data.estoque;
+            localStorage.setItem('estoque', JSON.stringify(estoque));  // Atualizar LocalStorage com dados do back-end
+            exibirEstoque(estoque);  // Exibir dados no front-end
+            gerarResumo(estoque);  // Gerar o resumo dos insumos
+        }
+
+        // Função para exibir os itens na tabela
+        function exibirEstoque(estoque) {
+            const tabela = document.getElementById('estoqueTabela');
+            tabela.innerHTML = '';  // Limpa a tabela antes de preencher
+            estoque.forEach((item, index) => {
+                tabela.innerHTML += `
+                    <tr data-tipo="${item.tipo}">
+                        <td>${item.descricao}</td>
+                        <td>${item.tipo}</td>
+                        <td>${item.quantidade}</td>
+                        <td>${item.data_cadastro}</td>
+                        <td>${item.data_expiracao}</td>
+                        <td>${item.valor_unitario.toFixed(2)}</td>
+                        <td>${item.valor_total.toFixed(2)}</td>
+                        <td>${item.lucro_estimado.toFixed(2)}</td>
+                        <td>
+                            <button class="btn btn-danger" onclick="excluirItem(${index})">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // Função para excluir um item do estoque
+        function excluirItem(index) {
+            estoque.splice(index, 1);  // Remove o item do estoque local
+            localStorage.setItem('estoque', JSON.stringify(estoque));  // Atualiza o LocalStorage
+            exibirEstoque(estoque);
+            gerarResumo(estoque);
+        }
+
+        // Função para filtrar os itens pelo tipo
+        function filtrarTipo() {
+            const filtro = document.getElementById('filtroTipo').value;
+            const linhas = document.querySelectorAll('#estoqueTabela tr');
+            linhas.forEach(linha => {
+                const tipo = linha.getAttribute('data-tipo');
+                if (filtro === 'todos' || tipo === filtro) {
+                    linha.style.display = '';
+                } else {
+                    linha.style.display = 'none';
+                }
+            });
+        }
+
+        // Função para gerar o resumo total de insumos
+        function gerarResumo(estoque) {
+            const resumo = {};
+            estoque.forEach(item => {
+                if (!resumo[item.tipo]) {
+                    resumo[item.tipo] = {
+                        quantidade_total: 0,
+                        valor_pago: 0,
+                        lucro_estimado_total: 0
+                    };
+                }
+                resumo[item.tipo].quantidade_total += item.quantidade;
+                resumo[item.tipo].valor_pago += item.valor_total;
+                resumo[item.tipo].lucro_estimado_total += item.lucro_estimado;
+            });
+
+            const resumoTabela = document.getElementById('resumoTabela');
+            resumoTabela.innerHTML = '';  // Limpa a tabela antes de preencher
+            for (const tipo in resumo) {
+                resumoTabela.innerHTML += `
+                    <tr>
+                        <td>${tipo}</td>
+                        <td>${resumo[tipo].quantidade_total}</td>
+                        <td>${resumo[tipo].valor_pago.toFixed(2)}</td>
+                        <td>${resumo[tipo].lucro_estimado_total.toFixed(2)}</td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Carregar o estoque ao iniciar a página
+        window.onload = carregarEstoque;
+    </script>
+</body>
+</html>
