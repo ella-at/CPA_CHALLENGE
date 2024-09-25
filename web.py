@@ -2,7 +2,7 @@ from flask import Flask, request, render_template, redirect, url_for, flash, jso
 import os
 import cx_Oracle  
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 app = Flask(__name__)
